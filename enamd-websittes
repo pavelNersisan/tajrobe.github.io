@@ -1,0 +1,31 @@
+import requests
+from bs4 import BeautifulSoup
+
+url: "https://www.enamad.ir/DomainListForMIMT"
+
+response: !python/requests.get
+  url: url
+
+if response.status_code == 200:
+  soup: !python/BeautifulSoup
+    content: response.content
+    features: "html.parser"
+
+  table: !python/soup.find
+    name: "table"
+    class_: "table"
+
+  if table:
+    domain_names: []
+    rows: !python/table.find_all
+      name: "tr"
+    for row in rows[1:]:
+      domain_names += row.td.text
+
+    print("Domain names:")
+    for name in domain_names:
+      print(name)
+  else:
+    print("Table not found on the webpage.")
+else:
+  print("Failed to retrieve the webpage. Check the URL or your internet connection.")
